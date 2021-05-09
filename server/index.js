@@ -2,6 +2,7 @@ const http = require('http');
 const express = require('express');
 const socketio = require('socket.io');
 const cors = require('cors');
+const colors = require('colors');
 
 const { addUser, removeUser, getUser, getUsersInRoom } = require('./users');
 
@@ -21,7 +22,7 @@ io.on('connect', (socket) => {
     if(error) return callback(error);
 
     socket.join(user.room);
-    console.log(`>> User '${user.name}' joined room '${user.room}'    ${new Date()}`);
+    console.log(`>> User '${user.name}' joined room '${user.room}' on [${new Date().toUTCString()}]`.green.bold);
     socket.emit('message', { user: 'admin', text: `${user.name}, welcome to room ${user.room}.`});
     socket.broadcast.to(user.room).emit('message', { user: 'admin', text: `${user.name} has joined!` });
 
@@ -42,11 +43,12 @@ io.on('connect', (socket) => {
     const user = removeUser(socket.id);
 
     if(user) {
-      console.log(`>> User '${user.name}' has left room '${user.room}'    ${new Date()}`);
+      console.log(`>> User '${user.name}' has left room '${user.room}' on [${new Date().toUTCString()}]`.red.bold);
       io.to(user.room).emit('message', { user: 'admin', text: `${user.name} has left.` });
       io.to(user.room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room)});
     }
   })
 });
 
-server.listen(5000, () => console.log(`Server has started 0n PORT 5000`));
+server.listen(5000, () => console.log(`Server has started on PORT 5000
+`.yellow.bold));
